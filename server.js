@@ -1,11 +1,11 @@
 const { createServer } = require('net');
 const server = createServer();
 
-// Array of sockets
 let players = [];
 let id = 1;
 let check = false;
 let check1 = false;
+let beginCheck = 0;
 
 board = new Array(5)
 for (i=0; i < 5; i++) {
@@ -27,11 +27,14 @@ server.on('connection', (socket) => {
 
   socket.on('data', data => {
 
+
     if((checkBegin(data) === 'S' ||
         checkBegin(data) === 'N' ||
         checkBegin(data) === 'W' ||
         checkBegin(data) === 'E') &&
-        check1 === false && socket.logged === true){
+        check  === true &&
+        check1 === false &&
+        socket.logged === true){
           socket.firstMove = checkBegin(data);
           socket.write('OK\n');
           check1 = true;
@@ -61,19 +64,33 @@ server.on('connection', (socket) => {
 
         let x = getRandomInt(5);
         let y = getRandomInt(5);
+
         while(board[x][y] !== 0){
           let x = getRandomInt(5);
           let y = getRandomInt(5);
         }
         board[x][y] = players[i].id;
-
-        players[i].write(`PLAYERS\n`);
-        for(let j=0; j < 2; j++){
-          players[i].write(`${players[j].login}. ${getCO(board, players[j])}\n`);
-        }
+        beginCheck++;
     }
     check = true;
+
+    for(var i = 0; i < players.length; i++){
+    players[i].write(`PLAYERS\n`);
+    for(let j=0; j < 2; j++){
+      players[i].write(`${players[j].login}. ${getCO(board, players[j])}\n`);
+    }
   }
+}
+
+      if(beginCheck === 2){
+        socket.write('GAME\n');
+
+        socket.setTimeout(100);
+        socket.on('timeout', () => {
+          socket.write(`${board.join("\n")}\n\n`);
+      })
+      }
+
 
 })
 });
@@ -120,7 +137,7 @@ function getCO(a, s){
   for(let i=0; i < 5; i++){
     for(let j=0; j < 5; j++){
       if(a[i][j] === s.id){
-        return `${i} ${j}`;
+        return `${i + 1} ${j + 1}`;
       }
       }
     }
