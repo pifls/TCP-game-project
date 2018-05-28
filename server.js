@@ -3,6 +3,7 @@ const server = createServer();
 
 let players = [];
 let id = 1;
+let check = false;
 
 board = new Array(5)
 for (i=0; i < 5; i++) {
@@ -28,12 +29,22 @@ server.on('connection', (socket) => {
   socket.on('data', data => {
 
     if(checkLogin(data) !== ' ' && socket.logged === false){
+      players.push(socket);
       socket.login = checkLogin(data);
-      socket.write('OK');
+      socket.write('OK\n');
       socket.logged = true;
     } else{
       socket.write('ERROR\n');
     }
+
+    if(players.length === 2 && check === false){
+      for(let i = 0; i < players.length; i++){
+        players[i].write(`START ${socket.login}\n`);
+    }
+    check = true;
+  }
+
+
 
 })
 });
