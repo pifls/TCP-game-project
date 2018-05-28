@@ -44,7 +44,10 @@ server.on('connection', (socket) => {
 
         let x = getRandomInt(5);
         let y = getRandomInt(5);
-
+        while(board[x][y] !== 0){
+          let x = getRandomInt(5);
+          let y = getRandomInt(5);
+        }
         board[x][y] = players[i].id;
 
         players[i].write(`PLAYERS\n`);
