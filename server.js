@@ -1,6 +1,7 @@
 const { createServer } = require('net');
 const server = createServer();
 
+// Array of sockets
 let players = [];
 let id = 1;
 let check = false;
@@ -16,9 +17,6 @@ for(let i=0; i < 5; i++){
   }
 }
 
-// MAX ILOŚĆ GRACZY
-server.maxConnections = 2;
-
 server.on('connection', (socket) => {
   socket.logged = false;
   socket.id = id;
@@ -33,23 +31,38 @@ server.on('connection', (socket) => {
       socket.login = checkLogin(data);
       socket.write('OK\n');
       socket.logged = true;
+
+      // MAX ILOŚĆ GRACZY
+      server.maxConnections = 2;
     } else{
       socket.write('ERROR\n');
     }
 
     if(players.length === 2 && check === false){
-      for(let i = 0; i < players.length; i++){
-        players[i].write(`START ${socket.login}\n`);
+      for(var i = 0; i < players.length; i++){
+        players[i].write(`START ${players[i].login}\n`);
+
+        let x = getRandomInt(5);
+        let y = getRandomInt(5);
+
+        board[x][y] = players[i].id;
+
+        players[i].write(`PLAYERS\n`);
+        for(let j=0; j < 2; j++){
+          players[i].write(`${players[j].login}. ${getCO(board, players[j])}\n`);
+        }
     }
     check = true;
   }
-
-
 
 })
 });
 
 server.listen(3000);
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
 
 
 function checkLogin(d){
@@ -68,3 +81,13 @@ function checkLogin(d){
      }
 
 }
+
+function getCO(a, s){
+  for(let i=0; i < 5; i++){
+    for(let j=0; j < 5; j++){
+      if(a[i][j] === s.id){
+        return `${i} ${j}`;
+      }
+      }
+    }
+  }
