@@ -5,6 +5,7 @@ const server = createServer();
 let players = [];
 let id = 1;
 let check = false;
+let check1 = false;
 
 board = new Array(5)
 for (i=0; i < 5; i++) {
@@ -26,6 +27,20 @@ server.on('connection', (socket) => {
 
   socket.on('data', data => {
 
+    if((checkBegin(data) === 'S' ||
+        checkBegin(data) === 'N' ||
+        checkBegin(data) === 'W' ||
+        checkBegin(data) === 'E') &&
+        check1 === false && socket.logged === true){
+          socket.firstMove = checkBegin(data);
+          socket.write('OK\n');
+          check1 = true;
+        } else{
+          if(socket.logged === true && check1 === false){
+          socket.write('ERROR\n');
+        }
+        }
+
     if(checkLogin(data) !== ' ' && socket.logged === false){
       players.push(socket);
       socket.login = checkLogin(data);
@@ -35,7 +50,9 @@ server.on('connection', (socket) => {
       // MAX ILOŚĆ GRACZY
       server.maxConnections = 2;
     } else{
+      if(socket.logged === false){
       socket.write('ERROR\n');
+    }
     }
 
     if(players.length === 2 && check === false){
@@ -82,7 +99,21 @@ function checkLogin(d){
      } else{
        return ' ';
      }
+}
+function checkBegin(d){
 
+  if(d[0] == 66 &&
+     d[1] == 69 &&
+     d[2] == 71 &&
+     d[3] == 73 &&
+     d[4] == 78 &&
+     d[5] == 32   ){
+
+       let login = d.toString().substr(6).slice(0, -1).trim();
+       return login;
+     } else{
+       return ' ';
+     }
 }
 
 function getCO(a, s){
