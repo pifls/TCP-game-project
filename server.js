@@ -5,7 +5,11 @@ let players = [];
 let id = 1;
 let check = false;
 let check1 = false;
+let check2 = false;
+let check3 = false;
+let check4 = false;
 let beginCheck = 0;
+var x = false;
 
 board = new Array(5)
 for (i=0; i < 5; i++) {
@@ -28,6 +32,8 @@ server.on('connection', (socket) => {
   socket.on('data', data => {
 
 
+
+
     if((checkBegin(data) === 'S' ||
         checkBegin(data) === 'N' ||
         checkBegin(data) === 'W' ||
@@ -39,8 +45,8 @@ server.on('connection', (socket) => {
           socket.write('OK\n');
           check1 = true;
         } else{
-          if(socket.logged === true && check1 === false){
-          socket.write('ERROR\n');
+          if(socket.logged === true && check1 === false && check2 === false){
+          socket.write('ERROR2\n');
         }
         }
 
@@ -49,12 +55,13 @@ server.on('connection', (socket) => {
       socket.login = checkLogin(data);
       socket.write('OK\n');
       socket.logged = true;
+      socket.game = false;
 
       // MAX ILOŚĆ GRACZY
       server.maxConnections = 2;
     } else{
       if(socket.logged === false){
-      socket.write('ERROR\n');
+      socket.write('ERROR1\n');
     }
     }
 
@@ -83,13 +90,35 @@ server.on('connection', (socket) => {
 }
 
       if(beginCheck === 2){
-        socket.write('GAME\n');
-
-        socket.setTimeout(100);
-        socket.on('timeout', () => {
-          socket.write(`${board.join("\n")}\n\n`);
-      })
+        check2 = true;
+        for(let i=0; i<players.length; i++){
+          if(players[i].game === false){
+        players[i].write('GAME\n');
+        players[i].game = true;
       }
+      if(x === false){
+      players[i].setTimeout(1000);
+players[i].on('timeout', () => {
+  players[i].write(`${board.join('\n')}\n\n`);
+  check4 = false;
+  x = true;;
+});
+}
+
+      }
+
+
+      if((checkMove(data) === 'L' ||
+          checkMove(data) === 'S' ||
+          checkMove(data) === 'R') &&
+          check4 === false){
+           socket.direction = checkMove(data);
+           socket.write('OK\n');
+           check4 = true;
+      } else{
+        socket.write('ERROR3\n');
+      }
+    }
 
 
 })
@@ -111,8 +140,8 @@ function checkLogin(d){
      d[4] == 78 &&
      d[5] == 32   ){
 
-       let login = d.toString().substr(6).slice(0, -1).trim();
-       return login;
+       let output = d.toString().substr(6).slice(0, -1).trim();
+       return output;
      } else{
        return ' ';
      }
@@ -126,8 +155,22 @@ function checkBegin(d){
      d[4] == 78 &&
      d[5] == 32   ){
 
-       let login = d.toString().substr(6).slice(0, -1).trim();
-       return login;
+       let output = d.toString().substr(6).slice(0, -1).trim();
+       return output;
+     } else{
+       return ' ';
+     }
+}
+function checkMove(d){
+
+  if(d[0] == 77 &&
+     d[1] == 79 &&
+     d[2] == 86 &&
+     d[3] == 69 &&
+     d[4] == 32   ){
+
+       let output = d.toString().substr(5).slice(0, -1).trim();
+       return output;
      } else{
        return ' ';
      }
@@ -137,7 +180,7 @@ function getCO(a, s){
   for(let i=0; i < 5; i++){
     for(let j=0; j < 5; j++){
       if(a[i][j] === s.id){
-        return `${i + 1} ${j + 1}`;
+        return `${j + 1} ${i + 1}`;
       }
       }
     }
