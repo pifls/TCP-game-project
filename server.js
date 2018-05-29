@@ -6,7 +6,7 @@ const server = createServer();
 let players = [];
 let id = 1;
 let check = false;
-let check1 = false;
+let check1 = 0;
 let check2 = false;
 let check3 = false;
 let check4 = false;
@@ -41,13 +41,13 @@ server.on('connection', (socket) => {
         checkBegin(data) === 'W' ||
         checkBegin(data) === 'E') &&
       check === true &&
-      check1 === false &&
+      check1 !== 2 &&
       socket.logged === true) {
-      socket.firstMove = checkBegin(data);
+      socket.head = checkBegin(data);
       socket.write('OK\n');
-      check1 = true;
+      check1++;
     } else {
-      if (socket.logged === true && check1 === false && check2 === false) {
+      if (socket.logged === true && check1 !== 2 && check2 === false) {
         socket.write('ERROR2\n');
       }
     }
@@ -59,6 +59,7 @@ server.on('connection', (socket) => {
       socket.logged = true;
       socket.game = false;
       socket.moveMade = false;
+      socket.direction = 'S';
 
       // MAX ILOŚĆ GRACZY
       server.maxConnections = 2;
@@ -80,6 +81,8 @@ server.on('connection', (socket) => {
           let y = getRandomInt(5);
         }
         board[x][y] = players[i].id;
+        players[i].xPos = x;
+        players[i].yPos = y;
         beginCheck++;
       }
       check = true;
@@ -92,7 +95,7 @@ server.on('connection', (socket) => {
       }
     }
 
-    if (beginCheck === 2) {
+    if (beginCheck === 2 && check1 === 2) {
       check2 = true;
       for (let i = 0; i < players.length; i++) {
         if (players[i].game === false) {
@@ -102,9 +105,110 @@ server.on('connection', (socket) => {
         if (x === false) {
           players[i].setTimeout(5000);
           players[i].on('timeout', () => {
+
+            switch (players[i].head) {
+              case 'N':
+                switch (players[i].direction) {
+                  case 'S':
+                    if (players[i].xPos - 1 >= 0) {
+                      board[players[i].xPos - 1][players[i].yPos] = players[i].id;
+                      players[i].xPos--;
+                    }
+                    break;
+                  case 'L':
+                    if (players[i].yPos - 1 >= 0) {
+                      board[players[i].xPos][players[i].yPos - 1] = players[i].id;
+                      players[i].yPos--;
+                      players[i].head = 'W';
+                    }
+                    break;
+                  case 'R':
+                    if (players[i].yPos + 1 <= 4) {
+                      board[players[i].xPos][players[i].yPos + 1] = players[i].id;
+                      players[i].yPos++;
+                      players[i].head = 'E';
+                    }
+                    break;
+                }
+                break;
+              case 'S':
+                switch (players[i].direction) {
+                  case 'S':
+                    if (players[i].xPos + 1 <= 4) {
+                      board[players[i].xPos + 1][players[i].yPos] = players[i].id;
+                      players[i].xPos++;
+                    }
+                    break;
+                  case 'L':
+                    if (players[i].yPos + 1 <= 4) {
+                      board[players[i].xPos][players[i].yPos + 1] = players[i].id;
+                      players[i].yPos++;
+                      players[i].head = 'E';
+                    }
+                    break;
+                  case 'R':
+                    if (players[i].yPos - 1 >= 0) {
+                      board[players[i].xPos][players[i].yPos - 1] = players[i].id;
+                      players[i].yPos--;
+                      players[i].head = 'W';
+                    }
+                    break;
+                }
+                break;
+              case 'W':
+                switch (players[i].direction) {
+                  case 'S':
+                    if (players[i].yPos - 1 >= 0) {
+                      board[players[i].xPos][players[i].yPos - 1] = players[i].id;
+                      players[i].yPos--;
+                    }
+                    break;
+                  case 'L':
+                    if (players[i].xPos + 1 <= 4) {
+                      board[players[i].xPos + 1][players[i].yPos] = players[i].id;
+                      players[i].xPos++;
+                      players[i].head = 'S';
+
+                    }
+                    break;
+                  case 'R':
+                    if (players[i].xPos - 1 >= 0) {
+                      board[players[i].xPos - 1][players[i].yPos] = players[i].id;
+                      players[i].xPos--;
+                      players[i].head = 'N';
+                    }
+                    break;
+                }
+                break;
+              case 'E':
+                switch (players[i].direction) {
+                  case 'S':
+                    if (players[i].yPos + 1 <= 4) {
+                      board[players[i].xPos][players[i].yPos + 1] = players[i].id;
+                      players[i].yPos++;
+                    }
+                    break;
+                  case 'L':
+                    if (players[i].xPos - 1 >= 0) {
+                      board[players[i].xPos + 1][players[i].yPos] = players[i].id;
+                      players[i].xPos++;
+                      players[i].head = 'N';
+                    }
+                    break;
+                  case 'R':
+                    if (players[i].xPos + 1 <= 4) {
+                      board[players[i].xPos + 1][players[i].yPos] = players[i].id;
+                      players[i].xPos++;
+                      players[i].head = 'S';
+                    }
+                    break;
+                }
+                break;
+            }
             players[i].write(`${board.join('\n')}\n\n`);
             players[i].moveMade = false;
-            x = true;;
+            x = true;
+            players[i].direction = 'S';
           });
         }
 
