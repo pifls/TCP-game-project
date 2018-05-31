@@ -1,6 +1,5 @@
-const {
-  createServer
-} = require('net');
+const { createServer } = require('net');
+
 const server = createServer();
 
 let players = [];
