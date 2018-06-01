@@ -1,5 +1,4 @@
 const { createServer } = require('net');
-
 const server = createServer();
 
 let players = [];
@@ -45,6 +44,7 @@ server.on('connection', (socket) => {
       socket.head = checkBegin(data);
       socket.write('OK\n');
       check1++;
+      socket.begin = true;
     } else {
       if (socket.logged === true && check1 !== 2 && check2 === false) {
         socket.write('ERROR2\n');
@@ -59,6 +59,7 @@ server.on('connection', (socket) => {
       socket.game = false;
       socket.moveMade = false;
       socket.direction = 'S';
+      socket.begin = false;
 
       // MAX ILOŚĆ GRACZY
       server.maxConnections = 2;
@@ -189,7 +190,7 @@ server.on('connection', (socket) => {
                     break;
                   case 'L':
                     if (players[i].xPos - 1 >= 0) {
-                      board[players[i].xPos + 1][players[i].yPos] = players[i].id;
+                      board[players[i].xPos - 1][players[i].yPos] = players[i].id;
                       players[i].xPos++;
                       players[i].head = 'N';
                     }
@@ -213,16 +214,19 @@ server.on('connection', (socket) => {
 
       }
 
-
-      if ((checkMove(data) === 'L' ||
+      if (((checkMove(data) === 'L' ||
           checkMove(data) === 'S' ||
           checkMove(data) === 'R') &&
-        socket.moveMade === false) {
+        socket.moveMade === false)) {
         socket.direction = checkMove(data);
         socket.write('OK\n');
         socket.moveMade = true;
       } else {
+        if(socket.begin === true){
+          socket.begin = false;
+        } else {
         socket.write('ERROR3\n');
+      }
       }
     }
 
