@@ -288,26 +288,6 @@ server.on('connection', (socket) => {
               }
               }
             }
-          } else {
-
-            if(players[i].isPlaying === true){
-          //  players[i].write(`${board.join('\n')}\n\n`);
-          } else{
-            if(players[i].lost === false){
-              if(players[i].score < 2) {
-                if(k === false){
-                players[i].write(`WIN\n`);
-                k = true;
-              }
-              } else {
-            players[i].write(`LOST ${players[i].score}\n`);
-            players[i].lost = true;
-          }
-          }
-          }
-
-
-
           }
 
          if(players[i].isPlaying === true){

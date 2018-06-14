@@ -291,7 +291,7 @@ server.on('connection', (socket) => {
           } else {
 
             if(players[i].isPlaying === true){
-          //  players[i].write(`${board.join('\n')}\n\n`);
+            players[i].write(`${board.join('\n')}\n\n`);
           } else{
             if(players[i].lost === false){
               if(players[i].score < 2) {
