@@ -35,6 +35,13 @@ server.on('connection', (socket) => {
 
   socket.on('data', data => {
 
+      if(socket.badMessage === 100){
+        socket.destroy();
+      }
+
+
+
+
 
 
 
@@ -51,6 +58,7 @@ server.on('connection', (socket) => {
       socket.begin = true;
     } else {
       if (socket.logged === true && check1 !== 2 && check2 === false) {
+        socket.badMessage++;
         socket.write('ERROR2\n');
       }
     }
@@ -60,6 +68,7 @@ server.on('connection', (socket) => {
       socket.login = checkLogin(data);
       socket.write('OK\n');
       socket.logged = true;
+      socket.badMessage = 0;
       socket.game = false;
       socket.moveMade = false;
       socket.direction = 'S';
@@ -78,6 +87,7 @@ server.on('connection', (socket) => {
       server.maxConnections = 2;
     } else {
       if (socket.logged === false) {
+        socket.badMessage++;
         socket.write('ERROR1\n');
       }
     }
@@ -110,6 +120,8 @@ server.on('connection', (socket) => {
 
     if (beginCheck === 2 && check1 === 2) {
       check2 = true;
+
+
       for (let i = 0; i < players.length; i++) {
 
         if (players[i].game === false) {
@@ -117,7 +129,7 @@ server.on('connection', (socket) => {
           players[i].game = true;
         }
         if (players[i].x === false) {
-          players[i].setTimeout(1000);
+          players[i].setTimeout(100);
           players[i].on('timeout', () => {
 
             if(players[i].check5 === true){
@@ -125,7 +137,7 @@ server.on('connection', (socket) => {
               case 'N':
                 switch (players[i].direction) {
                   case 'S':
-                    if (players[i].xPos - 1 >= 0 && board[players[i].xPos - 1][players[i].yPos] === 0 ) {
+                    if (players[i].xPos - 1 >= 0 && board[players[i].xPos - 1][players[i].yPos] === 0) {
                       board[players[i].xPos - 1][players[i].yPos] = players[i].id;
                       players[i].xPos--;
                     } else {
@@ -288,6 +300,26 @@ server.on('connection', (socket) => {
               }
               }
             }
+          } else {
+
+            if(players[i].isPlaying === true){
+          //  players[i].write(`${board.join('\n')}\n\n`);
+          } else{
+            if(players[i].lost === false){
+              if(players[i].score < 2) {
+                if(k === false){
+                players[i].write(`WIN\n`);
+                k = true;
+              }
+              } else {
+            players[i].write(`LOST ${players[i].score}\n`);
+            players[i].lost = true;
+          }
+          }
+          }
+
+
+
           }
 
          if(players[i].isPlaying === true){
@@ -305,6 +337,7 @@ server.on('connection', (socket) => {
 
       }
 
+
       if (((checkMove(data) === 'L' ||
           checkMove(data) === 'S' ||
           checkMove(data) === 'R') &&
@@ -316,6 +349,7 @@ server.on('connection', (socket) => {
         if(socket.begin === true){
           socket.begin = false;
         } else {
+        socket.badMessage++;
         socket.write('ERROR3\n');
       }
       }
