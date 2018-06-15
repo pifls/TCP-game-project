@@ -400,7 +400,7 @@ server.on('connection', (socket) => {
   })
 });
 
-server.listen(3000);
+server.listen(3000, '150.254.68.180');
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
