@@ -7,17 +7,17 @@ client.connect(3000, function() {
 
 client.on('data', function(data) {
 
-    if(data.toString().slice(0, -1) === 'CONNECT'){
-      client.write('LOGIN pimpek ');
+  if (data.toString().slice(0, -1) === 'CONNECT') {
+    client.write('LOGIN pimpek ');
 
-      while(true){
-        client.write(client);
-      }
+    while (true) {
+      client.write(client);
+    }
   }
 
 
 
-    console.log(data.toString().slice(0, -1));
+  console.log(data.toString().slice(0, -1));
 
 });
 

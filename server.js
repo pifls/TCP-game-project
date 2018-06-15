@@ -42,7 +42,7 @@ server.on('connection', (socket) => {
 
   server.on('error', () => {
     socket.destroy();
-});
+  });
 
 
   socket.logged = false;

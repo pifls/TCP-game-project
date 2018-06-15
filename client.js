@@ -7,18 +7,18 @@ client.connect(3000, function() {
 
 client.on('data', function(data) {
 
-    if(data.toString().slice(0, -1) === 'CONNECT'){
-      client.write('LOGIN pimpek ');
+  if (data.toString().slice(0, -1) === 'CONNECT') {
+    client.write('LOGIN pimpek ');
   }
-    if(data.toString()[0] === 'S' &&
-       data.toString()[1] === 'T' &&
-       data.toString()[2] === 'A' &&
-       data.toString()[3] === 'R' &&
-       data.toString()[4] === 'T'){
-      client.write('BEGIN N\n');
-    }
+  if (data.toString()[0] === 'S' &&
+    data.toString()[1] === 'T' &&
+    data.toString()[2] === 'A' &&
+    data.toString()[3] === 'R' &&
+    data.toString()[4] === 'T') {
+    client.write('BEGIN N\n');
+  }
 
-    console.log(data.toString().slice(0, -1));
+  console.log(data.toString().slice(0, -1));
 
 });
 
